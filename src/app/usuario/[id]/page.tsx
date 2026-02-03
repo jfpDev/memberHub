@@ -185,7 +185,7 @@ export default function MemberDetailPage({
                   <DetailRow
                     icon={<MapPin className="h-4 w-4 text-muted-foreground" />}
                     label="Full Address"
-                    value={`${member.address}, ${member.city}, ${member.state} ${member.zipCode}`}
+                    value={`${member.address}, ${member.city}`}
                   />
                 </CardContent>
               </Card>
