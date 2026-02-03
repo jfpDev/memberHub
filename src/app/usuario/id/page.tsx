@@ -73,33 +73,58 @@ function DetailRow({ icon, label, value }: DetailRowProps) {
   )
 }
 
-export default function MemberDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = use(params)
+// export function generateStaticParams() {
+//   return {
+//     id: '123',
+//     firstName: 'fulano',
+//     lastName: 'de tal',
+//     email: 'example@mail.com',
+//     phone: '123456789',
+//     address: 'Main house',
+//     city: 'Metropolis',
+//     membershipType: "standard",
+//     enrollmentDate: new Date(),
+//     notes: 'Some notes here',
+//     createdAt: new Date()
+//   }
+// }
+
+export default function MemberDetailPage() {
+  // const { id } = use(params)
   const [member, setMember] = useState<Member | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    async function loadMember() {
-      try {
-        const memberData = await getMemberById(id)
-        if (memberData) {
-          setMember(memberData)
-        } else {
-          setError("Member not found")
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load member")
-      } finally {
-        setIsLoading(false)
-      }
-    }
-    loadMember()
-  }, [id])
+    // async function loadMember() {
+    //   try {
+    //     const memberData = await getMemberById(id)
+    //     if (memberData) {
+    //       setMember(memberData)
+    //     } else {
+    //       setError("Member not found")
+    //     }
+    //   } catch (err) {
+    //     setError(err instanceof Error ? err.message : "Failed to load member")
+    //   } finally {
+    //     setIsLoading(false)
+    //   }
+    // }
+    // loadMember()
+    setMember({
+      id: '123',
+      firstName: 'fulano',
+      lastName: 'de tal',
+      email: 'example@mail.com',
+      phone: '123456789',
+      address: 'Main house',
+      city: 'Metropolis',
+      membershipType: "standard",
+      enrollmentDate: new Date(),
+      notes: 'Some notes here',
+      createdAt: new Date()
+    })
+  }, [])
 
   return (
     <div className="min-h-screen bg-background">

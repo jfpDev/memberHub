@@ -6,7 +6,7 @@ import { Navigation } from "@/components/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { getAllMembers, type Member } from "@/lib/firebase"
-import { Users, UserPlus, Search, TrendingUp, Award, GraduationCap } from "lucide-react"
+import { Users, UserPlus, Search, TrendingUp } from "lucide-react"
 
 export default function DashboardPage() {
   const [members, setMembers] = useState<Member[]>([])
