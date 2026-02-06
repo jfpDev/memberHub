@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { type Member, filterMembersByCriteria, type MemberFilters, searchMembers } from "@/lib/firebase"
-import { Search, Loader2, User, Mail, Phone, ArrowRight, Users, X } from "lucide-react"
+import { Search, Loader2, Users, X } from "lucide-react"
 import { Timestamp } from "firebase/firestore"
 import {
   Select,
@@ -19,6 +19,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 
 function formatDate(date: Date | Timestamp | undefined): string {
   if (!date) return "N/A"
@@ -257,47 +265,53 @@ export function MemberSearch() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-4">
-            {members.map((member) => (
-              <Link key={member.id} href={`/member/${member.id}`}>
-                <Card className="transition-all hover:border-primary/50 hover:shadow-md">
-                  <CardContent className="flex items-center justify-between p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                        <User className="h-6 w-6 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">
+          <Card>
+            <CardContent className="p-0">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Nombre</TableHead>
+                      <TableHead>Cédula</TableHead>
+                      <TableHead>Teléfono</TableHead>
+                      <TableHead>Dirección</TableHead>
+                      <TableHead>Líder</TableHead>
+                      <TableHead>Lugar de Votación</TableHead>
+                      <TableHead>Mesa</TableHead>
+                      <TableHead>Tipo de Miembro</TableHead>
+                      <TableHead>Notas</TableHead>
+                      <TableHead>Fecha de Registro</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map((member) => (
+                      <TableRow key={member.id} className="cursor-pointer hover:bg-muted/50">
+                        <TableCell className="font-medium">
                           {member.firstName} {member.lastName}
-                        </h3>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Mail className="h-3.5 w-3.5" />
-                            {member.personId}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Phone className="h-3.5 w-3.5" />
-                            {member.phone}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <div className="text-right">
-                        <Badge
-                          variant="outline"
-                          className={getMembershipColor(member.memberType)}
-                        >
-                          {member.memberType}
-                        </Badge>
-                      </div>
-                      <ArrowRight className="h-5 w-5 text-muted-foreground" />
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </div>
+                        </TableCell>
+                        <TableCell>{member.personId}</TableCell>
+                        <TableCell>{member.phone}</TableCell>
+                        <TableCell>{member.address}</TableCell>
+                        <TableCell>{member.leader || "-"}</TableCell>
+                        <TableCell>{member.votingPlace}</TableCell>
+                        <TableCell>{member.table}</TableCell>
+                        <TableCell>
+                          <Badge
+                            variant="outline"
+                            className={getMembershipColor(member.memberType)}
+                          >
+                            {member.memberType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{member.notes || "-"}</TableCell>
+                        <TableCell>{formatDate(member.createdAt)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
