@@ -40,7 +40,7 @@ export interface Member {
   address: string
   leader: string | null
   votingPlace: string
-  table: string
+  table: number
   memberType: "voter" | "leader" | "visualizer"
   notes?: string
   createdAt: Date | Timestamp
@@ -84,13 +84,13 @@ export async function getMemberById(id: string): Promise<Member | null> {
 
 // Search members by field
 export async function searchMembers(
-  // field: "personId" | "table" | "membershipType" | "votingPlace",
-  value: string
+  field: "personId" | "table" | "votingPlace",
+  value: string | number
 ): Promise<Member[]> {
   // For partial matching, we use >= and <= with special characters
   const q = query(
     collection(db, MEMBERS_COLLECTION),
-    where("personId", "==", value),
+    where(field, "==", value),
   )
   const snapshot = await getDocs(q)
   return snapshot.docs.map((doc) => ({
@@ -155,7 +155,7 @@ export async function filterMembersByCriteria(filters: MemberFilters): Promise<M
   }
   
   if (filters.table) {
-    constraints.push(where("table", "==", filters.table.toUpperCase()))
+    constraints.push(where("table", "==", filters.table))
   }
   
   if (filters.memberType) {
@@ -174,6 +174,8 @@ export async function filterMembersByCriteria(filters: MemberFilters): Promise<M
     constraints.push(where("votingPlace", ">=", placeLower))
     constraints.push(where("votingPlace", "<=", placeLower + "\uf8ff"))
   }
+
+  console.log("Constraints:", constraints)
   
   // Build and execute query
   let q
@@ -184,6 +186,7 @@ export async function filterMembersByCriteria(filters: MemberFilters): Promise<M
   }
   
   const snapshot = await getDocs(q)
+  console.log(snapshot.docs.map(doc => doc.data()))
   let results = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
