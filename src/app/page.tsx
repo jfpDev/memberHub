@@ -28,9 +28,9 @@ export default function DashboardPage() {
 
   const stats = {
     total: members.length,
-    voters: members.filter((m) => m.membershipType === "voter").length,
-    leaders: members.filter((m) => m.membershipType === "leader").length,
-    visualizers: members.filter((m) => m.membershipType === "visualizer").length,
+    // voters: members.filter((m) => m.membershipType === "voter").length,
+    // leaders: members.filter((m) => m.membershipType === "leader").length,
+    // visualizers: members.filter((m) => m.membershipType === "visualizer").length,
   }
 
   return (

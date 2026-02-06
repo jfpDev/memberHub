@@ -43,7 +43,7 @@ function getMembershipColor(type: string) {
     case "voter":
       return "bg-sky-100 text-sky-800 border-sky-200"
     default:
-      return "bg-secondary text-secondary-foreground"
+      return "bg-green-100 text-green-600 border-green-200"
   }
 }
 
@@ -63,7 +63,7 @@ export function MemberSearch() {
   const handleFilterChange = (field: keyof MemberFilters, value: string) => {
     setFilters((prev) => ({
       ...prev,
-      [field]: value,
+      [field]: value.trim().toLowerCase(),
     }))
   }
 
@@ -193,7 +193,7 @@ export function MemberSearch() {
                 <Input
                   id="votingPlace"
                   type="text"
-                  placeholder="Ej: Escuela Central"
+                  placeholder="Ej: Ateneo"
                   value={filters.votingPlace || ""}
                   onChange={(e) => handleFilterChange("votingPlace", e.target.value)}
                   className="w-full"
@@ -300,7 +300,7 @@ export function MemberSearch() {
                             variant="outline"
                             className={getMembershipColor(member.memberType)}
                           >
-                            {member.memberType}
+                            {member.memberType === "leader" ? "Líder" : member.memberType === "voter" ? "Votante" : "Testigo"}
                           </Badge>
                         </TableCell>
                         <TableCell>{member.notes || "-"}</TableCell>

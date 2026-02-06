@@ -40,7 +40,7 @@ export interface Member {
   address: string
   leader: string | null
   votingPlace: string
-  table: number
+  table: string
   memberType: "voter" | "leader" | "visualizer"
   notes?: string
   createdAt: Date | Timestamp

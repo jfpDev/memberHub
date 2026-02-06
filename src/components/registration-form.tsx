@@ -31,7 +31,7 @@ export function RegistrationForm() {
     phone: "",
     address: "",
     votingPlace: "",
-    table: 0,
+    table: "",
     memberType: "voter" as "voter" | "leader" | "visualizer",
     notes: "",
   })
@@ -60,7 +60,7 @@ export function RegistrationForm() {
           phone: "",
           address: "",
           votingPlace: "",
-          table: 0,
+          table: "",
           memberType: "voter" as "voter" | "leader" | "visualizer",
           notes: "",
         })
@@ -165,7 +165,7 @@ export function RegistrationForm() {
               <Label htmlFor="membershipType">Tipo de miembro</Label>
               <Select
                 value={formData.memberType}
-                onValueChange={(value) => handleChange("membershipType", value)}
+                onValueChange={(value) => handleChange("memberType", value)}
               >
                 <SelectTrigger id="membershipType">
                   <SelectValue placeholder="Select membership" />
@@ -208,6 +208,7 @@ export function RegistrationForm() {
                 type="number"
                 value={formData.table}
                 onChange={(e) => handleChange("table", e.target.value)}
+                placeholder="00"
                 required
               />
             </div>
@@ -228,10 +229,10 @@ export function RegistrationForm() {
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Registering...
+                Registrando...
               </>
             ) : (
-              "Register Member"
+              "Registrar miembro"
             )}
           </Button>
         </form>
