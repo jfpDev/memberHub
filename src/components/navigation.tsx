@@ -15,17 +15,17 @@ export function Navigation() {
   const pathname = usePathname()
 
   return (
-    <nav className="border-b border-border bg-card">
-      <div className="mx-auto max-w-6xl px-4">
-        <div className="flex h-16 items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
+    <nav className="border-b border-border bg-card h-26 lg:h-20">
+      <div className="max-w-4xl px-4 m-auto">
+        <div className="flex flex-col lg:flex-row h-16 items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 mt-2">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
               <Users className="h-5 w-5 text-primary-foreground" />
             </div>
             <span className="text-lg font-semibold text-foreground">Construyendo Ideas</span>
           </Link>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 mt-3">
             {navItems.map((item) => {
               const isActive = pathname === item.href
               return (
