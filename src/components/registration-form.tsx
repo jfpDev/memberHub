@@ -3,7 +3,6 @@
 import React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,24 +19,27 @@ import { addMember } from "@/lib/firebase"
 import { Loader2, CheckCircle } from "lucide-react"
 
 export function RegistrationForm() {
-  const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
+    leader: "",
     firstName: "",
     lastName: "",
-    email: "",
+    personId: "",
     phone: "",
     address: "",
-    city: "",
-    membershipType: "standard" as "standard" | "premium" | "student",
-    enrollmentDate: new Date().toISOString().split("T")[0],
+    votingPlace: "",
+    table: 0,
+    memberType: "voter" as "voter" | "leader" | "visualizer",
     notes: "",
   })
 
   const handleChange = (field: string, value: string) => {
+    if (field === "leader" && value.trim() === "") {
+      value = null as unknown as string
+    }
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
@@ -47,13 +49,22 @@ export function RegistrationForm() {
     setError(null)
 
     try {
-      await addMember({
-        ...formData,
-        enrollmentDate: new Date(formData.enrollmentDate),
-      })
+      await addMember({...formData})
       setIsSuccess(true)
       setTimeout(() => {
-        router.push("/search")
+        setFormData({
+          leader: "",
+          firstName: "",
+          lastName: "",
+          personId: "",
+          phone: "",
+          address: "",
+          votingPlace: "",
+          table: 0,
+          memberType: "voter" as "voter" | "leader" | "visualizer",
+          notes: "",
+        })
+        setIsSuccess(false)
       }, 1500)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to register member")
@@ -68,7 +79,7 @@ export function RegistrationForm() {
         <CardContent className="flex flex-col items-center justify-center py-16">
           <CheckCircle className="h-16 w-16 text-accent" />
           <h2 className="mt-4 text-2xl font-semibold text-foreground">Registro exitoso!</h2>
-          <p className="mt-2 text-muted-foreground">Redirigiendo a la búsqueda...</p>
+          <p className="mt-2 text-muted-foreground">Continúa ingresando personas</p>
         </CardContent>
       </Card>
     )
@@ -115,13 +126,13 @@ export function RegistrationForm() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="email">Correo</Label>
+              <Label htmlFor="personId">Cédula</Label>
               <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleChange("email", e.target.value)}
-                placeholder="john@example.com"
+                id="personId"
+                type="text"
+                value={formData.personId}
+                onChange={(e) => handleChange("personId", e.target.value)}
+                placeholder="1110123456"
                 required
               />
             </div>
@@ -149,43 +160,54 @@ export function RegistrationForm() {
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <div className="space-y-2">
-              <Label htmlFor="city">Ciudad</Label>
-              <Input
-                id="city"
-                value={formData.city}
-                onChange={(e) => handleChange("city", e.target.value)}
-                placeholder="New York"
-                required
-              />
-            </div>
-          </div>
-
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-2 w-full">
               <Label htmlFor="membershipType">Tipo de miembro</Label>
               <Select
-                value={formData.membershipType}
+                value={formData.memberType}
                 onValueChange={(value) => handleChange("membershipType", value)}
               >
                 <SelectTrigger id="membershipType">
                   <SelectValue placeholder="Select membership" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="standard">Estandar</SelectItem>
-                  <SelectItem value="premium">Premium</SelectItem>
-                  <SelectItem value="student">Estudiante</SelectItem>
+                  <SelectItem value="leader">Líder</SelectItem>
+                  <SelectItem value="visualizer">Testigo</SelectItem>
+                  <SelectItem value="voter">Votante</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="enrollmentDate">Fecha de ingreso</Label>
+              <Label htmlFor="leader">Líder</Label>
               <Input
-                id="enrollmentDate"
-                type="date"
-                value={formData.enrollmentDate}
-                onChange={(e) => handleChange("enrollmentDate", e.target.value)}
+                id="leader"
+                value={formData.leader}
+                onChange={(e) => handleChange("leader", e.target.value)}
+                placeholder="Nombre del líder"
+                disabled={formData.memberType === "leader"}
+              />
+            </div>
+            
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <Label htmlFor="votingPlace">Lugar de votación</Label>
+              <Input
+                id="votingPlace"
+                value={formData.votingPlace}
+                onChange={(e) => handleChange("votingPlace", e.target.value)}
+                placeholder="La Nueva Jerusalem"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="table">Mesa</Label>
+              <Input
+                id="table"
+                type="number"
+                value={formData.table}
+                onChange={(e) => handleChange("table", e.target.value)}
                 required
               />
             </div>
