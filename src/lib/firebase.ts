@@ -1,8 +1,10 @@
+"use client"
+
 import { initializeApp, getApps } from "firebase/app"
 import {
   getFirestore,
   collection,
-  addDoc,
+  setDoc,
   getDocs,
   getDoc,
   doc,
@@ -33,24 +35,31 @@ export interface Member {
   id?: string
   firstName: string
   lastName: string
-  email: string
+  personId: string
   phone: string
   address: string
-  city: string
-  membershipType: "standard" | "premium" | "student"
-  enrollmentDate: Date | Timestamp
+  leader: string | null
+  votingPlace: string
+  table: string
+  memberType: "voter" | "leader" | "visualizer"
   notes?: string
   createdAt: Date | Timestamp
 }
 
 // Add a new member
 export async function addMember(member: Omit<Member, "id" | "createdAt">) {
-  const docRef = await addDoc(collection(db, MEMBERS_COLLECTION), {
+  const docRef = doc(db, MEMBERS_COLLECTION, member.personId)
+  const snapshot = await getDoc(docRef)
+  
+  if (snapshot.exists()) {
+    throw new Error(`La persona con cédula ${member.personId} ya está registrada.`)
+  }
+  
+  await setDoc(docRef, {
     ...member,
-    enrollmentDate: Timestamp.fromDate(new Date(member.enrollmentDate as unknown as string)),
     createdAt: Timestamp.now(),
   })
-  return docRef.id
+  return member.personId
 }
 
 // Get all members
@@ -75,14 +84,13 @@ export async function getMemberById(id: string): Promise<Member | null> {
 
 // Search members by field
 export async function searchMembers(
-  field: "email" | "phone" | "lastName",
+  // field: "personId" | "table" | "membershipType" | "votingPlace",
   value: string
 ): Promise<Member[]> {
   // For partial matching, we use >= and <= with special characters
   const q = query(
     collection(db, MEMBERS_COLLECTION),
-    where(field, ">=", value),
-    where(field, "<=", value + "\uf8ff")
+    where("personId", "==", value),
   )
   const snapshot = await getDocs(q)
   return snapshot.docs.map((doc) => ({
@@ -111,19 +119,108 @@ export async function searchMembersMultiField(searchTerm: string): Promise<Membe
   const termLower = searchTerm.toLowerCase().trim()
   
   return allMembers.filter((member) => {
-    const fullName = `${member.firstName} ${member.lastName}`.toLowerCase()
-    const email = member.email.toLowerCase()
+    const type = member.memberType
+    const place = member.votingPlace.toLowerCase()
+    const leader = member.leader?.toLowerCase()
+    const personId = member.personId.toLowerCase()
     const phone = member.phone.replace(/\D/g, "") // Remove non-digits for phone comparison
     const searchDigits = termLower.replace(/\D/g, "")
     
     return (
-      fullName.includes(termLower) ||
-      member.firstName.toLowerCase().includes(termLower) ||
-      member.lastName.toLowerCase().includes(termLower) ||
-      email.includes(termLower) ||
-      (searchDigits && phone.includes(searchDigits))
+      type.includes(termLower) ||
+      leader && leader.includes(termLower) ||
+      place.toLowerCase().includes(termLower) ||
+      phone.includes(termLower) ||
+      personId.includes(termLower)
     )
   })
 }
 
+// Filter members by multiple criteria
+export interface MemberFilters {
+  personId?: string
+  memberType?: string
+  leader?: string
+  phone?: string
+  votingPlace?: string
+  table?: string
+}
+
+export async function filterMembersByCriteria(filters: MemberFilters): Promise<Member[]> {
+  const constraints: any[] = []
+  
+  // Add exact match filters
+  if (filters.personId) {
+    constraints.push(where("personId", "==", filters.personId.toUpperCase()))
+  }
+  
+  if (filters.table) {
+    constraints.push(where("table", "==", filters.table.toUpperCase()))
+  }
+  
+  if (filters.memberType) {
+    constraints.push(where("membershipType", "==", filters.memberType))
+  }
+  
+  // Add range query filters for partial text matching
+  if (filters.leader) {
+    const leaderLower = filters.leader.toLowerCase()
+    constraints.push(where("leader", ">=", leaderLower))
+    constraints.push(where("leader", "<=", leaderLower + "\uf8ff"))
+  }
+  
+  if (filters.votingPlace) {
+    const placeLower = filters.votingPlace.toLowerCase()
+    constraints.push(where("votingPlace", ">=", placeLower))
+    constraints.push(where("votingPlace", "<=", placeLower + "\uf8ff"))
+  }
+  
+  // Build and execute query
+  let q
+  if (constraints.length > 0) {
+    q = query(collection(db, MEMBERS_COLLECTION), ...constraints, orderBy("createdAt", "desc"))
+  } else {
+    q = query(collection(db, MEMBERS_COLLECTION), orderBy("createdAt", "desc"))
+  }
+  
+  const snapshot = await getDocs(q)
+  let results = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  })) as Member[]
+  
+  // Client-side filtering for phone (since we need digit-only matching)
+  if (filters.phone) {
+    const phoneDigits = filters.phone.replace(/\D/g, "")
+    results = results.filter((member) => {
+      const memberPhoneDigits = member.phone.replace(/\D/g, "")
+      return memberPhoneDigits.includes(phoneDigits)
+    })
+  }
+  
+  return results
+}
+
 export { db }
+
+
+// rules_version = '2';
+
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /{document=**} {
+//       allow read, write: if
+//           request.time < timestamp.date(2026, 3, 6);
+//     }
+//   }
+// }
+
+// rules_version = '2';
+
+// service cloud.firestore {
+//   match /databases/{database}/documents {
+//     match /{document=**} {
+//       allow read, write: if false;
+//     }
+//   }
+// }
